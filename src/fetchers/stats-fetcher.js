@@ -40,11 +40,11 @@ const GRAPHQL_REPOS_QUERY = `
 `;
 
 const GRAPHQL_STATS_QUERY = `
-  query userInfo($login: String!, $after: String) {
+  query userInfo($login: String!, $after: String, $from: DateTime) {
     user(login: $login) {
       name
       login
-      contributionsCollection {
+      contributionsCollection(from: $from) {
         totalCommitContributions
         restrictedContributionsCount
       }
@@ -100,8 +100,14 @@ const statsFetcher = async (username) => {
   let stats;
   let hasNextPage = true;
   let endCursor = null;
+  const currentYearDate = new Date(new Date().getFullYear(), 0, 1);
   while (hasNextPage) {
-    const variables = { login: username, first: 100, after: endCursor };
+    const variables = {
+      login: username,
+      first: 100,
+      after: endCursor,
+      from: currentYearDate,
+    };
     let res = await retryer(fetcher, variables);
     if (res.data.errors) return res;
 
